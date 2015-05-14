@@ -16,7 +16,10 @@ Global variable for this module:
 
 
 def for_circle(x, y, radius):
-    return [x - radius, y - radius, x + radius, y + radius]
+    try:
+        return [x - radius, y - radius, x + radius, y + radius]
+    except:
+        return 2
 
 
 def into_center(center, scale0):
@@ -27,41 +30,73 @@ def into_center(center, scale0):
     :return: None
     """
     try:
+        test = [0 for i in range(9)]
         global mol_gl
         summ, num, x_y_0 = ([0, 0], [0, 0], [0, 0])
         optimal_part = 0.85
         max_size, min_size = ([0, 0], [0, 0])
-
+        # test
+        test[0] = 1 if summ == [0, 0] and num == [0, 0] and x_y_0 == [0, 0] and max_size == [0, 0] and \
+                       max_size == [0, 0] else 2
+        # test
+        test[1] = 2
+        test[2] = 2
         for atom in mol_gl.atom_block:
             for i in 0, 1:
                 summ[i] += atom[i]
                 num[i] += 1
-        for i in 0, 1:
-            x_y_0[i] = summ[i] / num[i]
+            test[1] = 1
+        test[2] = 1
+        # test
+        if num[0] == 0 or num[1] == 0:
+            x_y_0[i] = 0
+            test[3] = 2
+        else:
+            test[3] = 1
+            test[5] = 2
+            for i in 0, 1:
+                x_y_0[i] = summ[i] / num[i]
+                if str(type(x_y_0[i])) == "<class 'float'>":
+                    test[4 + i] = 1
+                else:
+                    test[4 + i] = 2
+            test[5] = 1
+        # test
+        test[6] = 2
         for num_atom in range(len(mol_gl.atom_block)):
             atom = mol_gl.atom_block[num_atom]
+            test[6] = 1 if atom is mol_gl.atom_block[num_atom] else 2
             for i in 0, 1:
                 current_size = atom[i]
                 if (max_size[i] < current_size) or (num_atom == 0):
                     max_size[i] = current_size
                 if (min_size[i] > current_size) or (num_atom == 0):
                     min_size[i] = current_size
+        test[6] = 1
         scale = [0, 0]
         delta = [0, 0]
+        test[7] = 2
         for i in 0, 1:
             k = (max_size[i] - min_size[i]) / 2
             delta[i] = (max_size[i] + min_size[i]) / 2
-            scale[i] = center[i] * optimal_part / k
+            if k == 0:
+                scale[i] = center[i] * optimal_part
+            else:
+                scale[i] = center[i] * optimal_part / k
         scale = min(*scale) * scale0
-
+        test[7] = 1
+        test[8] = 2
         for num_atom in range(len(mol_gl.atom_block)):
             atom = mol_gl.atom_block[num_atom]
             for i in 0, 1:
                 atom[i] -= delta[i]
                 atom[i] *= scale
                 atom[i] += center[i]
+        test[8] = 1
+        return test
     except:
         send_error_msg()
+        return test
 
 
 def double_line(bond, ro=1):
@@ -127,6 +162,8 @@ def draw_mol(mol, canv0, scale=1):
     :param scale: scale
     :return: None
     """
+    global ERRORS_COUNTER
+    ERRORS_COUNTER = 0
     try:
         " This function renews the global variable and sets value of argument on default"
         global mol_gl, canv_gl, dict_of_aroma_bonds, type_bond_gl, three_valencies
@@ -232,10 +269,11 @@ def dfs_aroma(atom):
 
 
 def send_error_msg():
-    global ERRORS_COUNTER
+    """global ERRORS_COUNTER
     ERRORS_COUNTER += 1
     if ERRORS_COUNTER < 2:
         import tkinter.messagebox
         tkinter.messagebox.showerror(title='Сообщение', message='Информация о молекуле некорректна')
     else:
-        pass
+        pass"""
+    pass
